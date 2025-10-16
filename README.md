@@ -113,11 +113,13 @@ Include A/B testing for model validation
 
 🏁 Author
 ## 👨‍💻 Author
-**Om Channoji**  
+**Omrohit Channoji**  
 Aspiring Data Analyst | Python | SQL | Power BI | Machine Learning
 
 📧 *Feel free to connect on LinkedIn or explore my GitHub for more projects!*
 
+##linkedin: https://www.linkedin.com/in/omrohit/
 ---
 
 ⭐ **If you find this project useful, don’t forget to star this repository!**
+
