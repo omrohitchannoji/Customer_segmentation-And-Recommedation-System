@@ -76,7 +76,7 @@ The dataset is used to compute **RFM features** and derive customer segments.
 ## 🧩 How to Run
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/Customer-Segmentation-Recommendation.git
+   git clone https://github.com/omrohitchannoji/Customer-Segmentation-Recommendation.git
    cd Customer-Segmentation-Recommendation
 
 2. **Install dependencies**
@@ -122,4 +122,5 @@ Aspiring Data Analyst | Python | SQL | Power BI | Machine Learning
 ---
 
 ⭐ **If you find this project useful, don’t forget to star this repository!**
+
 
