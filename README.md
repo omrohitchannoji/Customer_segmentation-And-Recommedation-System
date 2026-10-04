@@ -1,126 +1,47 @@
-# 🧠 Customer Segmentation and Recommendation System
+# Customer Segmentation & Purchase Behaviour Analysis
 
-## 📘 Overview
-This project focuses on **customer segmentation** and **personalized product recommendations** using data-driven analytics. It applies **RFM analysis** (Recency, Frequency, Monetary) and **K-Means clustering** to group customers based on purchasing behavior, followed by a **recommendation engine** built using the **ALS (Alternating Least Squares)** algorithm.
+## Business questions
+Which customers buy recently, repeatedly and at higher value? How do credits affect observed spend? Which differentiated marketing actions could be tested?
 
-The goal is to help businesses identify key customer segments, understand purchasing patterns, and deliver tailored product recommendations to enhance customer retention and sales.
-
----
-
-## 📊 Key Features
-- **Data Preprocessing & Cleaning**: Handled missing values, outliers, and normalization.
-- **Exploratory Data Analysis (EDA)**: Insights on Recency, Frequency, and Monetary value distributions.
-- **Customer Segmentation**: Implemented **K-Means clustering** to classify customers into distinct groups.
-- **Dimensionality Reduction**: Used **PCA** for visualizing high-dimensional customer data.
-- **Recommendation Engine**: Built with **ALS** for personalized product recommendations.
-- **Data Visualization**: Plots created using **Matplotlib**, **Seaborn**, and **Plotly**.
-
----
-
-## 🧰 Tech Stack
-- **Languages:** Python  
-- **Libraries:**  
-  `pandas`, `numpy`, `matplotlib`, `seaborn`, `plotly`, `scikit-learn`, `scipy`, `yellowbrick`, `tabulate`
-- **Machine Learning:**  
-  - Clustering: `KMeans` (from `sklearn.cluster`)
-  - Dimensionality Reduction: `PCA`
-  - Recommender System: `ALS`
-
----
-
-## 🗂 Dataset
-**File:** `Data.csv`  
-Contains transaction-level data including:
-- `CustomerID`
-- `InvoiceNo`
-- `StockCode`
-- `Quantity`
-- `InvoiceDate`
-- `UnitPrice`
-- `Country`
-
-The dataset is used to compute **RFM features** and derive customer segments.
-
----
-
-## 🚀 Project Workflow
-1. **Data Import and Cleaning**
-   - Removed nulls and duplicates
-   - Handled outliers in purchase amounts
-
-2. **Feature Engineering**
-   - Computed Recency, Frequency, and Monetary scores
-   - Derived behavioral and product diversity metrics
-
-3. **Customer Segmentation**
-   - Applied **K-Means clustering**
-   - Visualized clusters using **PCA**
-
-4. **Recommendation Engine**
-   - Built an **ALS**-based collaborative filtering model
-   - Generated personalized product recommendations
-
-5. **Visualization and Insights**
-   - Cluster profiling and RFM distribution analysis
-   - Plotted customer groups using 2D/3D scatter plots
-
----
-
-## 📈 Results
-- Customers segmented into distinct behavioral groups (e.g., “High-Value”, “Frequent Buyers”, “At-Risk”).
-- Recommendation model able to predict personalized products based on historical interactions.
-- Visual dashboards created for easy interpretation of clusters and customer patterns.
-
----
-
-## 🧩 How to Run
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/omrohitchannoji/Customer-Segmentation-Recommendation.git
-   cd Customer-Segmentation-Recommendation
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Run the notebook**
-   ```bash
-   jupyter notebook "Customer_segmentation And Recommendation System.ipynb"
-   ```
-
----
-
-## 📁 Project Structure
-
+## Run
+```bash
+pip install -r requirements.txt
+jupyter notebook Customer_Segmentation.ipynb
 ```
-Customer-Segmentation-and-Recommendation-System/
-│
-├── Customer_segmentation And Recommendation System.ipynb   # Main notebook
-├── data/                                                   # Folder for dataset(s)
-├── README.md                                               # Project documentation
-└── requirements.txt                                        # Python dependencies
-```
+Run all cells from the repository folder. The input filename is lowercase `data.csv`. Generated files are in outputs/. No Power BI dashboard is required.
 
----
-📚 Future Enhancements
+## Dataset and provenance
+User-supplied transaction CSV, 541,909 original rows with Online Retail schema. Original download provenance was not provided. Reference documentation: https://archive.ics.uci.edu/dataset/352/online+retail . Verify source, currency and reuse terms; schema matching does not establish provenance. Input was supplied as Latin-1 CSV.
 
-Integrate a web dashboard (e.g., Streamlit) for real-time insights
+## Cleaning and definitions
+Exact duplicate rows are removed as a disclosed assumption. Unknown customers are excluded from customer analysis. Invalid fields and exceptions are exported. Explicit service/manual adjustment/fee/gift codes are outside merchandise scope; see notebook and outputs/excluded_codes.csv.
 
-Add more recommendation techniques (content-based, hybrid)
+Recency uses last valid purchase relative to the day after the last valid transaction. Frequency counts distinct purchase invoices. Monetary clustering feature is gross positive purchase value. Negative-quantity credits are tracked separately and subtracted for NetSpend; they cannot be matched to original orders. ReturnInvoiceShare is the share of invoice events represented by returns, not an order return probability. CustomerID is never a model feature. Single-order customers retain undefined average purchase gaps and remain eligible.
 
-Include A/B testing for model validation
+## Clustering and evaluation
+Log1p RFM features are standardized. Compare k=2..6 using silhouette and minimum cluster share (5%); select the highest-scoring qualifying candidate and inspect original-unit profiles. Retain unusual customers, compare capped feature sensitivity and initialization stability. PCA is for visualization only. Cluster labels are descriptive, relative to observed medians and value ranks.
 
-🏁 Author
-## 👨‍💻 Author
-**Omrohit Channoji**  
-Aspiring Data Analyst | Python | SQL | Power BI | Machine Learning
+## Results and recommendations
+- 4,334 customers with valid purchases entered RFM clustering; customers without purchases remain in the separate metrics export.
+- Two clusters were selected from k=2..6, with sampled silhouette 0.434. This differs from the old three-cluster result because feature definitions and population handling were corrected.
+- The recent, repeat group contains 1,662 customers (38.35%) and contributes 84.93% of gross merchandise purchase value. Median recency is 17 days, order count 6 and gross value 2,041.33.
+- The less-recent, occasional group contains 2,672 customers (61.65%). Median recency is 97 days, order count 1 and gross value 356.92. Re-engagement is a proposed experiment, not a demonstrated benefit.
 
-📧 *Feel free to connect on LinkedIn or explore my GitHub for more projects!*
+See outputs/findings.md for verified numerical findings and proposed actions, outputs/segment_profiles.csv for profiles, and outputs/cluster_comparison.csv for cluster choice. No measured sales or retention uplift is claimed.
 
-##linkedin: https://www.linkedin.com/in/omrohit/
----
+![Segment profiles](outputs/segment_profiles.png)
+![Cluster comparison](outputs/cluster_comparison.png)
+![RFM projection](outputs/cluster_projection.png)
 
-⭐ **If you find this project useful, don’t forget to star this repository!**
+The recommendation output preserves segment-popular unseen products. It is a heuristic, not ALS; no predictive recommendation evaluation was performed.
 
+## Key outputs
+- customer_segments.csv: one row per purchasing customer, original-unit metrics and segment
+- all_customer_metrics.csv: includes return-only customers
+- segment_profiles.csv: counts, medians, value shares and proposed actions
+- cleaning_audit.csv and transaction_types.csv: population decisions
+- cluster_comparison.csv and cluster_sensitivity.csv: clustering evidence
+- segment_popularity_recommendations.csv: up to three unseen popular products
 
+## Limitations
+Incomplete identities, duplicate ambiguity, manual scope exclusions, unmatched credits and finite observation window. Clusters summarize history and can overlap; recency does not establish churn. Actions require controlled evaluation. Recommendations do not prove relevance. Notebook assertions reconcile values and prevent joins multiplying transactions.

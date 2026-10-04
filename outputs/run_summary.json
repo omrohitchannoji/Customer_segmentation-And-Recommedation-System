@@ -1,0 +1,11 @@
+{
+  "RawRows": 541909,
+  "EligibleCustomers": 4334,
+  "Clusters": 2,
+  "ReferenceDate": "2011-12-10",
+  "Features": [
+    "RecencyDays",
+    "Frequency",
+    "GrossPurchaseValue"
+  ]
+}

@@ -1,0 +1,6 @@
+Stage,Rows,KnownCustomers
+Raw,541909,4372
+After exact deduplication,536641,4372
+Valid transaction fields,536641,4372
+Merchandise scope,533701,4363
+Identified customers,399693,4363

@@ -1,0 +1,3 @@
+Cluster,Customers,MedianRecencyDays,MedianOrders,MedianGrossValue,MedianNetSpend,GrossValue,ReturnValue,NetSpend,CustomerSharePct,GrossValueSharePct,Segment,ProposedAction
+0,2672,97.0,1.0,356.91499999999996,349.625,1316809.262,31886.36,1284922.902,61.65205353022611,15.071248178533928,"Value tier 1/2: less recent, occasional",Test re-engagement messaging; measure incremental purchases
+1,1662,17.0,6.0,2041.33,1995.035,7420418.381,435941.37,6984477.011,38.34794646977388,84.92875182146608,"Value tier 2/2: recent, repeat",Test loyalty/service offers and monitor repeat purchases
