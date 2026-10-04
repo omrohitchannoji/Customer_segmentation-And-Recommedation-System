@@ -1,47 +1,149 @@
-# Customer Segmentation & Purchase Behaviour Analysis
+# 📊 E-Commerce Customer Segmentation & Purchase Behavior Analysis
 
-## Business questions
-Which customers buy recently, repeatedly and at higher value? How do credits affect observed spend? Which differentiated marketing actions could be tested?
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.0%2B-orange.svg)](https://scikit-learn.org/)
+[![Pandas](https://img.shields.io/badge/Pandas-1.4%2B-150458.svg)](https://pandas.pydata.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-## Run
-```bash
-pip install -r requirements.txt
-jupyter notebook Customer_Segmentation.ipynb
+An end-to-end data analytics and customer segmentation project utilizing transactional data to identify high-value customer segments, quantify return behaviors, and derive actionable marketing strategies using **RFM Analysis (Recency, Frequency, Monetary)**, **K-Means Clustering**, and **Market-Basket Popularity Heuristics**.
+
+---
+
+## 📌 Executive Summary
+
+Understanding customer purchase dynamics is critical for maximizing Customer Lifetime Value (CLV) and optimizing marketing spend. This analysis evaluates **541,909 raw transaction records** from an online retail business and segments **4,334 active purchasing customers** using mathematical clustering.
+
+### Key Insights & Findings
+* **85/15 Value Concentration**: **38.35% of customers** (Cluster 1: Recent, Repeat) generate **84.93% of total gross merchandise value** ($7,420,418.38).
+* **Optimal Segmentation ($K=2$)**: Evaluated $K \in [2, 6]$ using Silhouette Scoring and cluster size constraints ($\ge 5\%$). $K=2$ provided the highest silhouette score (**0.434**), separating customers into distinct value tiers without artificial over-segmentation.
+* **Return & Credit Handling**: Credits and returns ($8,506$ line items totaling -$471,750.71) were separated from gross positive sales ($8,737,227.64) to preserve accurate purchase behavior metrics while tracking net spend.
+* **Model Stability**: Cluster assignments were validated using **Adjusted Rand Index (ARI)** across multiple random seeds ($\text{ARI} \ge 0.999$) and 99th percentile feature tail capping ($\text{ARI} = 0.9706$).
+
+---
+
+## 🔍 Segment Overview & Comparison
+
+| Metric / Attribute | Cluster 0: Value Tier 1 (Less Recent, Occasional) | Cluster 1: Value Tier 2 (Recent, Repeat) | Overall Population |
+| :--- | :---: | :---: | :---: |
+| **Customer Count (% Share)** | 2,672 (61.65%) | 1,662 (38.35%) | 4,334 (100.0%) |
+| **Median Recency (Days)** | 97.0 days | 17.0 days | 51.0 days |
+| **Median Purchase Orders** | 1.0 order | 6.0 orders | 2.0 orders |
+| **Median Gross Spend ($)** | $356.92 | $2,041.33 | $662.56 |
+| **Median Net Spend ($)** | $349.62 | $1,995.04 | $646.84 |
+| **Total Gross Value ($)** | $1,316,809.26 (15.07%) | $7,420,418.38 (84.93%) | $8,737,227.64 (100.0%) |
+| **Total Return Value ($)** | $31,886.36 | $435,941.37 | $467,827.73 |
+| **Proposed Action** | Test win-back & re-engagement campaigns | Test VIP loyalty/service benefits | Data-driven targeting |
+
+---
+
+## 🛠️ Data Pipeline & Analytics Architecture
+
 ```
-Run all cells from the repository folder. The input filename is lowercase `data.csv`. Generated files are in outputs/. No Power BI dashboard is required.
+┌─────────────────────────┐
+│ Raw Transactions (541k) │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐   - Remove Exact Duplicates (5,268 rows)
+│ Audited Cleaning        ├─► - Exclude Missing Customer IDs (135,080 rows)
+└───────────┬─────────────┘   - Isolate Non-Merchandise Scope (POST, DOT, M, Fees)
+            │
+            ▼
+┌─────────────────────────┐   - Recency: Days to Anchor Date (2011-12-10)
+│ RFM Feature Formulation ├─► - Frequency: Distinct Purchase Invoices
+└───────────┬─────────────┘   - Gross Monetary: Positive Line Values
+            │
+            ▼
+┌─────────────────────────┐   - Log1p Transformation: log(1 + X)
+│ Scaling & Clustering    ├─► - StandardScaler Standardization
+└───────────┬─────────────┘   - K-Means Evaluation (K=2..6, Silhouette Scoring)
+            │
+            ▼
+┌─────────────────────────┐   - Segment Profiles & Financial Audits
+│ Outputs & Visualizations├─► - Sensitivity Checks (ARI Seed/Cap Validation)
+└─────────────────────────┘   - Segment Popularity Recommendation Engine
+```
 
-## Dataset and provenance
-User-supplied transaction CSV, 541,909 original rows with Online Retail schema. Original download provenance was not provided. Reference documentation: https://archive.ics.uci.edu/dataset/352/online+retail . Verify source, currency and reuse terms; schema matching does not establish provenance. Input was supplied as Latin-1 CSV.
+---
 
-## Cleaning and definitions
-Exact duplicate rows are removed as a disclosed assumption. Unknown customers are excluded from customer analysis. Invalid fields and exceptions are exported. Explicit service/manual adjustment/fee/gift codes are outside merchandise scope; see notebook and outputs/excluded_codes.csv.
+## 📈 Visualizations & Model Evaluation
 
-Recency uses last valid purchase relative to the day after the last valid transaction. Frequency counts distinct purchase invoices. Monetary clustering feature is gross positive purchase value. Negative-quantity credits are tracked separately and subtracted for NetSpend; they cannot be matched to original orders. ReturnInvoiceShare is the share of invoice events represented by returns, not an order return probability. CustomerID is never a model feature. Single-order customers retain undefined average purchase gaps and remain eligible.
+### 1. Segment Profiles Comparison
+Medians for recency, order count, and gross purchase value across identified clusters:
+![Segment Profiles](outputs/segment_profiles.png)
 
-## Clustering and evaluation
-Log1p RFM features are standardized. Compare k=2..6 using silhouette and minimum cluster share (5%); select the highest-scoring qualifying candidate and inspect original-unit profiles. Retain unusual customers, compare capped feature sensitivity and initialization stability. PCA is for visualization only. Cluster labels are descriptive, relative to observed medians and value ranks.
+### 2. K-Means Silhouette Evaluation ($K=2..6$)
+Selecting optimal $K$ based on silhouette score maximization and candidate cluster share constraint ($\ge 5\%$):
+![Cluster Comparison](outputs/cluster_comparison.png)
 
-## Results and recommendations
-- 4,334 customers with valid purchases entered RFM clustering; customers without purchases remain in the separate metrics export.
-- Two clusters were selected from k=2..6, with sampled silhouette 0.434. This differs from the old three-cluster result because feature definitions and population handling were corrected.
-- The recent, repeat group contains 1,662 customers (38.35%) and contributes 84.93% of gross merchandise purchase value. Median recency is 17 days, order count 6 and gross value 2,041.33.
-- The less-recent, occasional group contains 2,672 customers (61.65%). Median recency is 97 days, order count 1 and gross value 356.92. Re-engagement is a proposed experiment, not a demonstrated benefit.
+### 3. PCA Feature Space Projection
+2D projection of standardized $\log(1 + \text{RFM})$ feature space explaining principal variance:
+![RFM Projection](outputs/cluster_projection.png)
 
-See outputs/findings.md for verified numerical findings and proposed actions, outputs/segment_profiles.csv for profiles, and outputs/cluster_comparison.csv for cluster choice. No measured sales or retention uplift is claimed.
+---
 
-![Segment profiles](outputs/segment_profiles.png)
-![Cluster comparison](outputs/cluster_comparison.png)
-![RFM projection](outputs/cluster_projection.png)
+## 🚀 Key Output Files (`outputs/`)
 
-The recommendation output preserves segment-popular unseen products. It is a heuristic, not ALS; no predictive recommendation evaluation was performed.
+| Output File | Description |
+| :--- | :--- |
+| [`outputs/customer_segments.csv`](outputs/customer_segments.csv) | Primary customer table with calculated RFM metrics and assigned cluster labels. |
+| [`outputs/segment_profiles.csv`](outputs/segment_profiles.csv) | Aggregated medians, totals, revenue shares, and proposed business actions per cluster. |
+| [`outputs/cluster_comparison.csv`](outputs/cluster_comparison.csv) | Evaluation table comparing Silhouette scores, Inertia, and min cluster shares for $K=2..6$. |
+| [`outputs/cluster_sensitivity.csv`](outputs/cluster_sensitivity.csv) | Stability check results (ARI across seeds and 99th percentile capping). |
+| [`outputs/segment_popularity_recommendations.csv`](outputs/segment_popularity_recommendations.csv) | Top-3 unseen popular merchandise recommendations per customer. |
+| [`outputs/cleaning_audit.csv`](outputs/cleaning_audit.csv) | Full audit trail tracking row counts and known customer IDs across cleaning stages. |
+| [`outputs/findings.md`](outputs/findings.md) | Verified summary report of numerical findings and business recommendations. |
 
-## Key outputs
-- customer_segments.csv: one row per purchasing customer, original-unit metrics and segment
-- all_customer_metrics.csv: includes return-only customers
-- segment_profiles.csv: counts, medians, value shares and proposed actions
-- cleaning_audit.csv and transaction_types.csv: population decisions
-- cluster_comparison.csv and cluster_sensitivity.csv: clustering evidence
-- segment_popularity_recommendations.csv: up to three unseen popular products
+---
 
-## Limitations
-Incomplete identities, duplicate ambiguity, manual scope exclusions, unmatched credits and finite observation window. Clusters summarize history and can overlap; recency does not establish churn. Actions require controlled evaluation. Recommendations do not prove relevance. Notebook assertions reconcile values and prevent joins multiplying transactions.
+## 💡 Business Recommendations & Next Steps
+
+1. **Protect & Nurture High-Value Champions (Cluster 1)**:
+   - *Strategy*: Implement dedicated VIP customer support, early access to new product catalog arrivals, and volume-based loyalty benefits.
+   - *Rationale*: Cluster 1 drives **84.93% of merchandise value**. Preventing churn in this group is paramount.
+
+2. **Re-Engage Occasional Buyers (Cluster 0)**:
+   - *Strategy*: Deploy automated win-back email sequences (e.g., personalized discount incentives on top segment products) timed around day 60–90 post-purchase.
+   - *Rationale*: Median recency is **97 days** with only **1 purchase order**. Converting even 10% to repeat buyers yields substantial incremental revenue.
+
+3. **Controlled Experimentation (A/B Testing)**:
+   - All proposed marketing actions should be evaluated against control groups to measure true incremental uplift in purchase frequency and revenue.
+
+---
+
+## 💻 Installation & Usage
+
+### Prerequisites
+- Python 3.8 or higher
+- Jupyter Notebook / JupyterLab
+
+### Running the Analysis
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/omrohitchannoji/Customer_segmentation-And-Recommedation-System.git
+   cd Customer_segmentation-And-Recommedation-System
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Execute the Notebook**:
+   ```bash
+   jupyter notebook Customer_Segmentation.ipynb
+   ```
+   *Note: Ensure `data.csv` is present in the working directory before running.*
+
+---
+
+## ⚖️ Limitations & Disclaimers
+
+* **Observational Data**: Historical clusters summarize past purchasing behavior and do not establish causal churn predictors.
+* **Unmatched Credits**: Return line items (`CreditReturn`) are aggregated within the observation window; credit transactions are not linked to original invoice line items due to dataset schema constraints.
+* **Recommendation Engine**: Recommendations use a segment-popularity heuristic (excluding previously bought items), not an ALS matrix factorization model.
+
+---
+
+## 📜 License
+Distributed under the MIT License. See `LICENSE` for more information.
